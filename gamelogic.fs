@@ -10,7 +10,9 @@ module Gomoku =
 
    type GameBoard = GameBoardT<option<Player>>
 
-   type Game = Game of GameState*GameBoard
+   type Game = {gamest : GameState;
+                gamebd : GameBoard
+                occupied : int} //this int represents the board's current number of pieces
 
    type initGame = unit -> Game
 
@@ -24,6 +26,11 @@ module Gomoku =
 
    type matchCore = unit -> Game
 
+   let isWon game =
+      match game.gamest with
+      | Win _ -> true
+      | _ -> false
+
    let next plyr =
       match plyr with
       | White -> Black
@@ -31,38 +38,45 @@ module Gomoku =
 
    let initGame() =
      let board = Array2D.create 15 15 None
-     Game (Running Black, board)
+     {gamest = Running Black;
+      gamebd = board
+      occupied = 0}
    
-   let validMove (plyr,(x,y)) (Game (state,board)) =
-      let b = board.[x,y].IsNone
-      match state with
+   let getMove () = Black,(7,7)
+
+   let validMove (plyr,(x,y)) g =
+      let b = g.gamebd.[x,y].IsNone
+      match g.gamest with
       | Running p -> p=plyr && b
       | _ -> false
 
-   let playerMove (plyr,(x,y)) (Game (state,board)) =
-      board.[x,y] <- Some plyr
+   let playerMove (plyr,(x,y)) g =
+      g.gamebd.[x,y] <- Some plyr
+      let occ = g.occupied
       let l = [-4..4]
       let pieces =
-        let rec func ls (hor,vert,diag) = 
-          match ls with
-          | [] -> (hor, vert, diag)
-          | h :: t -> func t <| match (x+h < 0 || x+h > 14), (y+h < 0 || y+h > 14) with
-                              | true,true -> (hor, vert, diag)
-                              | true, false -> (hor, board.[x,y+h] :: vert, diag)
-                              | false, true -> (board.[x+h,y] :: hor, vert, diag)
-                              | false, false -> (board.[x+h,y] :: hor, board.[x,y+h] :: vert, board.[x+h,y+h] :: diag)
-        let rec count adjacent n =
-           match adjacent with
-           | [] -> n
-           | h :: t -> match h with
-                       | None -> count t 0
-                       | Some p -> if p = plyr then count t (n+1) else count t 0           
-        let tripl = func l ([],[],[])
-        (fun (x,y,z) -> count x 0 > 5 || count y 0 > 5 || count z 0 > 5) tripl
-      if pieces then Game (Win plyr, board)
-      else Game (Running <| next plyr, board)
+           let rec func ls (hor,vert,diag) = 
+            
+            match ls with
+            | [] -> (hor, vert, diag)
+            | h :: t -> func t <| match (x+h < 0 || x+h > 14), (y+h < 0 || y+h > 14) with
+                                  | true,true -> (hor, vert, diag)
+                                  | true, false -> (hor, g.gamebd.[x,y+h] :: vert, diag)
+                                  | false, true -> (g.gamebd.[x+h,y] :: hor, vert, diag)
+                                  | false, false -> (g.gamebd.[x+h,y] :: hor, g.gamebd.[x,y+h] :: vert, g.gamebd.[x+h,y+h] :: diag)
+           let rec count adjacent n =
+             match adjacent with
+             | [] -> n
+             | h :: t -> match h with
+                         | None -> count t 0
+                         | Some p -> if p = plyr then count t (n+1) else count t 0           
+           let tripl = func l ([],[],[])
+           (fun (x,y,z) -> count x 0 > 5 || count y 0 > 5 || count z 0 > 5) tripl
+      if pieces then {g with gamest = Win plyr; occupied = occ+1}
+      else {g with gamest = Running <| next plyr; occupied = occ+1}
     
-    let matchCore () =
-       let (Game (state,board)) = initGame ()
-       while (state <> (Win p)) do
-          
+   (*let matchCore () =
+       let game = initGame ()
+       while (not <| isWon game) do
+         if playerMove (getMove ()) game
+       game*)
