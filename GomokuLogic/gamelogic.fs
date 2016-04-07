@@ -1,4 +1,4 @@
-﻿namespace GomokuLogic
+namespace GomokuLogic
 
 module Gomoku = 
 
@@ -52,7 +52,7 @@ module Gomoku =
 
    let playerMove (plyr,(x,y)) g =
       g.gamebd.[x,y] <- Some plyr
-      let occ = g.occupied
+      let occ = g.occupied + 1
       let l = [-4..4]
       let pieces =
            let rec func ls (hor,vert,diag) = 
@@ -72,8 +72,9 @@ module Gomoku =
                          | Some p -> if p = plyr then count t (n+1) else count t 0           
            let tripl = func l ([],[],[])
            (fun (x,y,z) -> count x 0 > 5 || count y 0 > 5 || count z 0 > 5) tripl
-      if pieces then {g with gamest = Win plyr; occupied = occ+1}
-      else {g with gamest = Running <| next plyr; occupied = occ+1}
+      if pieces then {g with gamest = Win plyr; occupied = occ}
+      elif occ = 225 then {g with gamest = Draw; occupied = occ}
+      else {g with gamest = Running <| next plyr; occupied = occ}
     
    (*let matchCore () =
        let game = initGame ()
