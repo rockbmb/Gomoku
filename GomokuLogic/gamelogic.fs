@@ -26,9 +26,9 @@ module Gomoku =
 
    type matchCore = unit -> Game
 
-   let isWon game =
+   let isOver game =
       match game.gamest with
-      | Win _ -> true
+      | Win _ | Draw -> true
       | _ -> false
 
    let next plyr =
@@ -76,8 +76,9 @@ module Gomoku =
       elif occ = 225 then {g with gamest = Draw; occupied = occ}
       else {g with gamest = Running <| next plyr; occupied = occ}
     
-   (*let matchCore () =
+   let matchCore () =
        let game = initGame ()
-       while (not <| isWon game) do
-         if playerMove (getMove ()) game
-       game*)
+       while (not <| isOver game) do
+         let move = getMove ()
+         if validMove move game then playerMove move game |> ignore
+       game
