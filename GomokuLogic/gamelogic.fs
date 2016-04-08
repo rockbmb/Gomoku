@@ -76,9 +76,11 @@ module Gomoku =
       elif occ = 225 then {g with gamest = Draw; occupied = occ}
       else {g with gamest = Running <| next plyr; occupied = occ}
     
+   
    let matchCore () =
-       let game = initGame ()
-       while (not <| isOver game) do
+     let game = initGame ()
+     let rec helper g = 
          let move = getMove ()
-         if validMove move game then playerMove move game |> ignore
-       game
+         if (not <| isOver game && validMove move g) then helper <| playerMove move g
+     helper game
+       
