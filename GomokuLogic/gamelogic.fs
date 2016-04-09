@@ -83,6 +83,3 @@ module Gomoku =
          let move = getMove ()
          if (not <| isOver game && validMove move g) then helper <| playerMove move g
      helper game
-       
-
-//kkk
