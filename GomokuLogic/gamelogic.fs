@@ -4,55 +4,55 @@ module Gomoku =
 
    type Player = Black | White
 
-   type GameState = Running of Player (*player whose move was the last*) | Draw | Win of Player
+   type Gamestate = Running of Player (*player whose move was the last*) | Draw | Win of Player
 
    type GameBoardT<'T> = 'T [,]
 
    type GameBoard = GameBoardT<option<Player>>
 
-   type Game = {gamest : GameState;
-                gamebd : GameBoard
-                occupied : int} //this int represents the board's current number of pieces
+   type Game = {Gamest : Gamestate;
+                Gamebd : GameBoard
+                Occupied : int} //this int represents the board's current number of pieces
 
-   type initGame = unit -> Game
+   type InitGame = unit -> Game
 
-   type next = Player -> Player
+   type Next = Player -> Player
 
-   type validMove = Player * (int * int) -> Game -> bool
+   type ValidMove = Player * (int * int) -> Game -> bool
 
-   type playerMove = Player * (int * int) -> Game -> Game
+   type PlayerMove = Player * (int * int) -> Game -> Game
 
-   type getMove = unit -> Player * (int * int)
+   type GetMove = unit -> Player * (int * int)
 
-   type matchCore = unit -> Game
+   type MatchCore = unit -> Game
 
    let isOver game =
-      match game.gamest with
+      match game.Gamest with
       | Win _ | Draw -> true
       | _ -> false
 
-   let next plyr =
+   let Next plyr =
       match plyr with
       | White -> Black
       | Black -> White
 
-   let initGame() =
+   let InitGame() =
      let board = Array2D.create 15 15 None
-     {gamest = Running Black;
-      gamebd = board
-      occupied = 0}
+     {Gamest = Running Black;
+      Gamebd = board
+      Occupied = 0}
    
-   let getMove () = Black,(7,7)
+   let GetMove () = Black,(7,7)
 
-   let validMove (plyr,(x,y)) g =
-      let b = g.gamebd.[x,y].IsNone
-      match g.gamest with
+   let ValidMove (plyr,(x,y)) g =
+      let b = g.Gamebd.[x,y].IsNone
+      match g.Gamest with
       | Running p -> p=plyr && b
       | _ -> false
 
-   let playerMove (plyr,(x,y)) g =
-      g.gamebd.[x,y] <- Some plyr
-      let occ = g.occupied + 1
+   let PlayerMove (plyr,(x,y)) g =
+      g.Gamebd.[x,y] <- Some plyr
+      let occ = g.Occupied + 1
       let l = [-4..4]
       let pieces =
            let rec func ls (hor,vert,diag) = 
@@ -61,9 +61,9 @@ module Gomoku =
             | [] -> (hor, vert, diag)
             | h :: t -> func t <| match (x+h < 0 || x+h > 14), (y+h < 0 || y+h > 14) with
                                   | true,true -> (hor, vert, diag)
-                                  | true, false -> (hor, g.gamebd.[x,y+h] :: vert, diag)
-                                  | false, true -> (g.gamebd.[x+h,y] :: hor, vert, diag)
-                                  | false, false -> (g.gamebd.[x+h,y] :: hor, g.gamebd.[x,y+h] :: vert, g.gamebd.[x+h,y+h] :: diag)
+                                  | true, false -> (hor, g.Gamebd.[x,y+h] :: vert, diag)
+                                  | false, true -> (g.Gamebd.[x+h,y] :: hor, vert, diag)
+                                  | false, false -> (g.Gamebd.[x+h,y] :: hor, g.Gamebd.[x,y+h] :: vert, g.Gamebd.[x+h,y+h] :: diag)
            let rec count adjacent n =
              match adjacent with
              | [] -> n
@@ -72,14 +72,14 @@ module Gomoku =
                          | Some p -> if p = plyr then count t (n+1) else count t 0           
            let tripl = func l ([],[],[])
            (fun (x,y,z) -> count x 0 > 5 || count y 0 > 5 || count z 0 > 5) tripl
-      if pieces then {g with gamest = Win plyr; occupied = occ}
-      elif occ = 225 then {g with gamest = Draw; occupied = occ}
-      else {g with gamest = Running <| next plyr; occupied = occ}
+      if pieces then {g with Gamest = Win plyr; Occupied = occ}
+      elif occ = 225 then {g with Gamest = Draw; Occupied = occ}
+      else {g with Gamest = Running <| Next plyr; Occupied = occ}
     
    
-   let matchCore () =
-     let game = initGame ()
+   let MatchCore () =
+     let game = InitGame ()
      let rec helper g = 
-         let move = getMove ()
-         if (not <| isOver game && validMove move g) then helper <| playerMove move g
+         let move = GetMove ()
+         if (not <| isOver game && ValidMove move g) then helper <| PlayerMove move g
      helper game
