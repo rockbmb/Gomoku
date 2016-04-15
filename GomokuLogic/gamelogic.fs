@@ -71,7 +71,7 @@ module Gomoku =
                          | None -> count t 0
                          | Some p -> if p = plyr then count t (n+1) else count t 0           
            let tripl = func l ([],[],[])
-           (fun (x,y,z) -> count x 0 > 5 || count y 0 > 5 || count z 0 > 5) tripl
+           (fun (x,y,z) -> count x 0 > 4 || count y 0 > 4 || count z 0 > 4) tripl
       if pieces then {g with Gamest = Win plyr; Occupied = occ}
       elif occ = 225 then {g with Gamest = Draw; Occupied = occ}
       else {g with Gamest = Running <| Next plyr; Occupied = occ}

@@ -4,9 +4,9 @@ open Gomoku
 
 let game = InitGame()
 
-let moves = List.zip [3..6] [3..6]
+let moves = List.zip [8..12] [3..7]
 
-let plfun = List.zip (List.init 4 (fun _ -> Black)) moves
+let plfun = List.zip (List.init 5 (fun _ -> Black)) moves
 
 let g = List.fold (fun st t -> PlayerMove t st) game plfun
 
@@ -25,3 +25,5 @@ let prnt (g:Game) =
          prntP (g.Gamebd.[i,j])
       printfn " |"
    printfn "  - - - - - - - - - - - - - - -"
+
+prnt g
