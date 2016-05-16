@@ -9,10 +9,6 @@ let app =
     choose
         [ Filters.GET >=> choose
 
-            [ Filters.path "/" >=> (
-                  "My main page"
-                  |> Successful.OK)
-
-              Files.browse "C:\\Users\\Asus\\Desktop\\F#SF Mentorship\\Gomoku\\GomokuLogic\\Web Parts\\index.html" ] ]
+            [ Filters.path "/" >=> (Files.browse "C:\\Users\\Asus\\Desktop\\F#SF Mentorship\\Gomoku\\GomokuLogic\\Web Parts\\index.html") ] ]
 
 startWebServer defaultConfig app 
