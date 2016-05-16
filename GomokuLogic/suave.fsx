@@ -15,4 +15,4 @@ let app =
 
               Files.browse "C:\\Users\\Asus\\Desktop\\F#SF Mentorship\\Gomoku\\GomokuLogic\\Web Parts\\index.html" ] ]
 
-startWebServer defaultConfig app
+startWebServer defaultConfig app 
